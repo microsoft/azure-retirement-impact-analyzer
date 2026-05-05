@@ -1,33 +1,111 @@
-# Project
+# Azure Service Retirement – Impact Assessment Tool
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repository provides **Azure Resource Graph (ARG) queries** and a **PowerShell utility**
+to help customers identify Azure resources that are impacted by specific Azure service retirements.
+ 
+The PowerShell script automatically executes **read-only ARG queries** that are maintained in a
+separate text file and outputs the results locally for customer review.
 
-As the maintainer of this project, please make a few updates:
+## What is included
+ 
+- `queries.txt`
+  - A maintained set of Azure Resource Graph (KQL) queries
+  - Each query corresponds to a specific Azure service retirement
+  - Includes retirement metadata and a public “Learn more” URL
+  - **Reviewed and refreshed on a regular cadence (every 2 weeks)**
+ 
+- `Get-RetirementImpactedResources.ps1`
+  - PowerShell script to execute the ARG queries
+  - Aggregates results across subscriptions accessible to the signed-in user
+  - Outputs results to console and/or CSV
+ 
+---
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Prerequisites
 
-## Contributing
+1. **Azure CLI**
+   - Install: https://learn.microsoft.com/cli/azure/install-azure-cli
+   - Login before running the script:
+     ```
+     az login --environment AzureChinaCloud
+     ```
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit [Contributor License Agreements](https://cla.opensource.microsoft.com).
+2. **PowerShell** — Works with PowerShell 5.1+ (built-in on Windows)
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## File Structure
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Place the following files in the **same folder**:
 
-## Trademarks
+```
+YourFolder\
+├── run-arg-queries.ps1   (Script)
+└── queries.txt           (Query file, provided)
+```
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+## Usage
+
+- The script runs **only in the customer’s Azure tenant**
+- Queries are executed using the **current user’s Azure context**
+- All operations are **read-only**
+- No resources are modified
+- No data is transmitted outside the customer environment
+ 
+---
+
+## Output
+
+- Console will display impacted resources for each retiring feature.
+- If impacted resources are found, a CSV file `impactedresources.csv` will be generated in the same folder.
+- If no resources are impacted, NO CSV file will be generated — this means your environment is not affected.
+
+## Troubleshooting
+
+**1. Execution Policy Error**
+
+If you see "cannot be loaded because the file is not digitally signed":
+
+```powershell
+Unblock-File .\run-arg-queries.ps1
+```
+
+Or bypass for a single run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run-arg-queries.ps1
+```
+
+**2. Azure CLI Not Logged In**
+
+If you see authentication errors, please login first:
+
+```
+az login --environment AzureChinaCloud
+```
+
+**3. No Output File Generated**
+
+This is expected when no resources are impacted. Check the console output — it should show "No resources impacted".
+
+---
+
+## Important notes
+ 
+- This repository contains **maintained discovery utilities**, not ad-hoc samples
+- There is **no SLA or official support guarantee**
+- Customers are responsible for validating results before taking any action
+- Azure access permissions determine what resources are visible
+ 
+---
+ 
+## Security & Compliance
+ 
+- No secrets, credentials, or tokens are included
+- No customer data is collected or sent externally
+- No write, update, or delete operations are performed
+- The script requires explicit user consent before execution
+ 
+---
+ 
+## License
+ 
+This project is licensed under the MIT License.
