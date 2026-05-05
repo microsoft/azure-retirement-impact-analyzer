@@ -7,7 +7,7 @@ The PowerShell script automatically executes **read-only ARG queries** that are 
 separate text file and outputs the results locally for customer review.
 
 ## What is included
- 
+ Inside folder Impact-Analyzer you will find
 - `queries.txt`
   - A maintained set of Azure Resource Graph (KQL) queries
   - Each query corresponds to a specific Azure service retirement
