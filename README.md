@@ -25,7 +25,7 @@ separate text file and outputs the results locally for customer review.
 
 1. **Azure CLI**
    - Install: https://learn.microsoft.com/cli/azure/install-azure-cli
-   - Login before running the script:
+   - Login to your specific cloud before running the script:
      ```
      az login --environment AzureChinaCloud
      ```
@@ -38,7 +38,7 @@ Place the following files in the **same folder**:
 
 ```
 YourFolder\
-├── run-arg-queries.ps1   (Script)
+├── Get-RetirementImpactedResources.ps1   (Script)
 └── queries.txt           (Query file, provided)
 ```
 
@@ -65,18 +65,18 @@ YourFolder\
 If you see "cannot be loaded because the file is not digitally signed":
 
 ```powershell
-Unblock-File .\run-arg-queries.ps1
+Unblock-File .\Get-RetirementImpactedResources.ps1
 ```
 
 Or bypass for a single run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\run-arg-queries.ps1
+powershell -ExecutionPolicy Bypass -File .\Get-RetirementImpactedResources.ps1
 ```
 
 **2. Azure CLI Not Logged In**
 
-If you see authentication errors, please login first:
+If you see authentication errors, please login to your specific cloud first:
 
 ```
 az login --environment AzureChinaCloud
