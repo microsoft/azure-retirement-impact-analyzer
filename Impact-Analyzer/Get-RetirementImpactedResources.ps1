@@ -2,15 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-param(
-    [string]$QueriesFile,
-    [string]$OutputFile,
-    [string[]]$Subscriptions
-)
-
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $QueriesFile) { $QueriesFile = Join-Path $ScriptDir "queries.txt" }
-if (-not $OutputFile)  { $OutputFile  = Join-Path $ScriptDir "impactedresources.csv" }
+$QueriesFile = "queries.txt"
+$OutputFile = "impactedresources.csv"
 
 # Pre-install resource-graph extension silently
 az extension add -n resource-graph --only-show-errors 2>$null
@@ -45,10 +38,6 @@ foreach ($Query in $Queries) {
     
     do {
         $QueryArgs = @("-q", "@$TempFile", "-o", "json")
-        if ($Subscriptions) {
-            $QueryArgs += "--subscriptions"
-            $QueryArgs += $Subscriptions
-        }
         if ($SkipToken) {
             $QueryArgs += "--skip-token", $SkipToken
         }
@@ -68,9 +57,12 @@ foreach ($Query in $Queries) {
         Write-Host "$($AllQueryResults.Count) resources impacted" -ForegroundColor Green
         $AllQueryResults | Format-Table -AutoSize
         
-        # Add query number to each result for tracking
+        # Add metadata to each result for tracking
         foreach ($item in $AllQueryResults) {
             $item | Add-Member -NotePropertyName "RetiringFeature" -NotePropertyValue $RetiringFeature -Force
+            $subId = ""
+            if ($item.id -match '/subscriptions/([^/]+)/') { $subId = $Matches[1] }
+            $item | Add-Member -NotePropertyName "subscriptionId" -NotePropertyValue $subId -Force
             $AllResults += $item
         }
     }
@@ -86,4 +78,4 @@ if ($OutputFile -and $AllResults.Count -gt 0) {
     Write-Host ""
     Write-Host "Results exported to: $OutputFile" -ForegroundColor Cyan
     Write-Host "Total resources: $($AllResults.Count)" -ForegroundColor Cyan
-}
+} 
