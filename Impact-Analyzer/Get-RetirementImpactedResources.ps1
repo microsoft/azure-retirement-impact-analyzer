@@ -3,14 +3,10 @@
 # Licensed under the MIT License.
 
 param(
-    [string]$QueriesFile,
-    [string]$OutputFile,
+    [string]$QueriesFile = "queries.txt",
+    [string]$OutputFile = "impactedresources.csv",
     [string[]]$Subscriptions
 )
-
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $QueriesFile) { $QueriesFile = Join-Path $ScriptDir "queries.txt" }
-if (-not $OutputFile)  { $OutputFile  = Join-Path $ScriptDir "impactedresources.csv" }
 
 # Pre-install resource-graph extension silently
 az extension add -n resource-graph --only-show-errors 2>$null
