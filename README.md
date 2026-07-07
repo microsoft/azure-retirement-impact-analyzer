@@ -1,13 +1,13 @@
 # Azure Service Retirement – Impact Assessment Tool
 
-Users can access Azure retirement recommendations through [multiple channels](https://learn.microsoft.com/en-us/azure/advisor/advisor-how-to-use-service-upgrade-retirement-recommendations?tabs=portal%2Cservice-retire-2025#access-recommendations-through-multiple-channels). However, coverage of retirement recommendations for **Sovereign and National Partner Clouds** is not consistently up to date across these experiences. This repository is intended to bridge that gap by providing **Azure Resource Graph (ARG) queries** and a **PowerShell utility**
+Users can access Azure retirement recommendations through [multiple channels](https://learn.microsoft.com/en-us/azure/advisor/advisor-how-to-use-service-upgrade-retirement-recommendations?tabs=portal%2Cservice-retire-2025#access-recommendations-through-multiple-channels). However, coverage of retirement recommendations for **Sovereign and National Partner Clouds** is not consistently up to date across these experiences. This repository is intended to bridge that gap by providing **Azure Resource Graph (ARG) queries** and companion utilities
 to help customers identify Azure resources that are impacted by specific Azure service retirements.
  
-The PowerShell script automatically executes **read-only ARG queries** that are maintained in a
-separate text file and outputs the results locally for customer review.
+The repository includes both a **PowerShell script** and a **Bash shell script** to automatically execute **read-only ARG queries** that are maintained in a
+separate text file and output the results locally for customer review.
 
 ## What is included
- Inside folder Impact-Analyzer you will find
+Inside folder `Impact-Analyzer` you will find
 - `queries.txt`
   - A maintained set of Azure Resource Graph (KQL) queries
   - Each query corresponds to a specific Azure service retirement
@@ -16,8 +16,15 @@ separate text file and outputs the results locally for customer review.
  
 - `Get-RetirementImpactedResources.ps1`
   - PowerShell script to execute the ARG queries
+  - Intended for Windows or PowerShell environments
   - Aggregates results across subscriptions accessible to the signed-in user
-  - Outputs results to console and/or CSV
+  - Outputs results to console and CSV
+
+- `Get-RetirementImpactedResources.sh`
+  - Bash shell script to execute the ARG queries
+  - Intended for Linux, macOS, WSL, or Azure Cloud Shell environments
+  - Aggregates results across subscriptions accessible to the signed-in user
+  - Outputs results to console and CSV
  
 ---
 
@@ -30,7 +37,22 @@ separate text file and outputs the results locally for customer review.
      az login --environment AzureChinaCloud
      ```
 
-2. **PowerShell** — Works with PowerShell 5.1+ (built-in on Windows)
+### PowerShell script prerequisites
+
+2. **PowerShell**
+   - Works with PowerShell 5.1+ (built-in on Windows)
+
+### Bash shell script prerequisites
+
+2. **Bash**
+   - Available by default on most Linux/macOS environments and Azure Cloud Shell
+
+3. **jq**
+   - Required for JSON parsing in the shell script
+   - Example install on Ubuntu/Debian:
+     ```
+     sudo apt-get install jq
+     ```
 
 ## File Structure
 
@@ -38,9 +60,15 @@ Place the following files in the **same folder**:
 
 ```
 YourFolder\
-├── Get-RetirementImpactedResources.ps1   (Script)
+├── Get-RetirementImpactedResources.ps1 /├── Get-RetirementImpactedResources.sh
+  (Script)
 └── queries.txt           (Query file, provided)
 ```
+
+## Choose the script for your environment
+
+- Use `Get-RetirementImpactedResources.ps1` on **Windows** or when running in a **PowerShell** environment.
+- Use `Get-RetirementImpactedResources.sh` on **Linux**, **macOS**, **WSL**, or **Azure Cloud Shell**.
 
 ## Usage
 
@@ -56,11 +84,12 @@ YourFolder\
 
 - Console will display impacted resources for each retiring feature.
 - If impacted resources are found, a CSV file `impactedresources.csv` will be generated in the same folder.
-- If no resources are impacted, NO CSV file will be generated — this means your environment is not affected.
+- If no resources are impacted, no CSV file will be generated — this means your environment is not affected.
+- Both scripts use the same `queries.txt` input file and generate the same `impactedresources.csv` output file.
 
 ## Troubleshooting
 
-**1. Execution Policy Error**
+**1. Execution Policy Error (PowerShell)**
 
 If you see "cannot be loaded because the file is not digitally signed":
 
@@ -82,7 +111,17 @@ If you see authentication errors, please login to your specific cloud first:
 az login --environment AzureChinaCloud
 ```
 
-**3. No Output File Generated**
+**3. Missing jq (Bash shell script)**
+
+If you see an error that `jq` is not installed, install it and rerun the shell script.
+
+Example:
+
+```bash
+sudo apt-get install jq
+```
+
+**4. No Output File Generated**
 
 This is expected when no resources are impacted. Check the console output — it should show "No resources impacted".
 

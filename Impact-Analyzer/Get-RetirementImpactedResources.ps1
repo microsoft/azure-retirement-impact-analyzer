@@ -74,8 +74,28 @@ Remove-Item $TempFile -ErrorAction SilentlyContinue
 
 # Export results if output file specified
 if ($OutputFile -and $AllResults.Count -gt 0) {
-    $AllResults | Export-Csv -Path $OutputFile -NoTypeInformation -Force
+    # Convert nested objects/arrays to JSON strings to preserve them in CSV
+    $ExportResults = @()
+    foreach ($result in $AllResults) {
+        $ExportObj = New-Object PSObject
+        foreach ($prop in $result.PSObject.Properties) {
+            $value = $prop.Value
+            
+            # Check if value is an object or array (not string or primitive)
+            if (($value -is [System.Collections.IDictionary]) -or 
+                ($value -is [System.Collections.IEnumerable] -and $value -isnot [string]) -or
+                ($value -is [PSObject] -and $value -isnot [string])) {
+                # Convert to JSON string to preserve structure
+                $value = $value | ConvertTo-Json -Compress -Depth 10
+            }
+            
+            $ExportObj | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $value
+        }
+        $ExportResults += $ExportObj
+    }
+    
+    $ExportResults | Export-Csv -Path $OutputFile -NoTypeInformation -Force
     Write-Host ""
     Write-Host "Results exported to: $OutputFile" -ForegroundColor Cyan
-    Write-Host "Total resources: $($AllResults.Count)" -ForegroundColor Cyan
-} 
+    Write-Host "Total resources: $($ExportResults.Count)" -ForegroundColor Cyan
+}
